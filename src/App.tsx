@@ -321,6 +321,8 @@ export default function App() {
         setAuthError('E-mail ou senha incorretos.');
       } else if (error.code === 'auth/invalid-email') {
         setAuthError('E-mail inválido.');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        setAuthError('O login por e-mail ainda não foi ativado no Firebase Console. Por favor, ative-o em Authentication > Sign-in method.');
       } else {
         setAuthError('Ocorreu um erro ao entrar. Tente novamente.');
       }
