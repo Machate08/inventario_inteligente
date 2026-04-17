@@ -1075,119 +1075,162 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full text-center space-y-8 py-12"
         >
-          <div className="space-y-2">
-            <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-black/10">
+          <div className="space-y-3">
+            <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-black/20 ring-1 ring-white/10">
               <Package className="text-white" size={32} />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight">Inventário</h1>
-            <p className="text-zinc-500">Gerencie seu estoque, compras e vendas com inteligência artificial.</p>
+            <h1 className="text-5xl font-bold tracking-tighter italic font-serif">Inventário</h1>
+            <p className="text-zinc-400 text-sm max-w-[280px] mx-auto">Sistema inteligente de gestão de estoque e vendas para o mercado MZN.</p>
           </div>
 
-          <Card className="p-6 text-left space-y-4">
-            <h2 className="text-xl font-bold">{authMode === 'login' ? 'Entrar' : 'Criar Conta'}</h2>
-            
-            <form onSubmit={authMode === 'login' ? handleEmailLogin : handleEmailSignup} className="space-y-4">
-              {authMode === 'signup' && (
-                <Input
-                  label="Nome Completo"
-                  placeholder="Seu nome"
-                  value={name}
-                  onChange={(e: any) => setName(e.target.value)}
-                  required
-                />
-              )}
-              <Input
-                label="E-mail"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e: any) => setEmail(e.target.value)}
-                required
-              />
-              <Input
-                label="Senha"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e: any) => setPassword(e.target.value)}
-                required
-              />
-              {authMode === 'signup' && (
-                <Input
-                  label="Confirmar Senha"
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e: any) => setConfirmPassword(e.target.value)}
-                  required
-                />
-              )}
-
-              {authError && (
-                <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-red-600 text-sm">
-                  <AlertCircle size={16} />
-                  {authError}
-                </div>
-              )}
-
-              {authSuccess && (
-                <div className="p-3 bg-green-50 border border-green-100 rounded-lg flex items-center gap-2 text-green-600 text-sm">
-                  <CheckCircle2 size={16} />
-                  {authSuccess}
-                </div>
-              )}
-
-              <Button 
-                type="submit" 
-                className="w-full py-2.5" 
-                disabled={isAuthLoading}
-              >
-                {isAuthLoading ? (
-                  <Loader2 className="animate-spin" size={18} />
-                ) : (
-                  authMode === 'login' ? 'Entrar' : 'Criar Conta'
-                )}
-              </Button>
-            </form>
-
-            <div className="relative py-2">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-100"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-zinc-400 font-medium">Ou continue com</span>
+          <Card className="p-0 text-left overflow-hidden border-zinc-200/60 shadow-2xl shadow-black/5 bg-white/80 backdrop-blur-xl">
+            <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+              <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">{authMode === 'login' ? 'Authentication' : 'Registration'}</h2>
+              <div className="flex gap-1">
+                <div className="w-2 h-2 rounded-full bg-zinc-200" />
+                <div className="w-2 h-2 rounded-full bg-zinc-200" />
               </div>
             </div>
-
-            <Button 
-              onClick={loginWithGoogle} 
-              variant="secondary" 
-              className="w-full py-2.5" 
-              icon={TrendingUp}
-              disabled={isAuthLoading}
-            >
-              Google
-            </Button>
-
-            <div className="text-center pt-2">
-              <button 
-                onClick={() => {
-                  setAuthMode(authMode === 'login' ? 'signup' : 'login');
-                  setAuthError(null);
-                  setAuthSuccess(null);
-                }}
-                className="text-sm text-zinc-500 hover:text-black transition-colors"
-              >
-                {authMode === 'login' ? (
-                  <>Não tem uma conta? <span className="font-bold">Criar conta</span></>
-                ) : (
-                  <>Já tem uma conta? <span className="font-bold">Entrar</span></>
+            
+            <div className="p-6 space-y-6">
+              <form onSubmit={authMode === 'login' ? handleEmailLogin : handleEmailSignup} className="space-y-5">
+                {authMode === 'signup' && (
+                  <div className="space-y-1.5">
+                    <label className="label-caps">Full Name</label>
+                    <input
+                      placeholder="JOSÉ MACOMBE"
+                      value={name}
+                      onChange={(e: any) => setName(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm font-mono uppercase placeholder:opacity-30"
+                    />
+                  </div>
                 )}
-              </button>
+                
+                <div className="space-y-1.5">
+                  <label className="label-caps">Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="user@system.mzn"
+                    value={email}
+                    onChange={(e: any) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm font-mono placeholder:opacity-30"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="label-caps">Secure Key</label>
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e: any) => setPassword(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm font-mono"
+                  />
+                </div>
+
+                {authMode === 'signup' && (
+                  <div className="space-y-1.5">
+                    <label className="label-caps">Verify Key</label>
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e: any) => setConfirmPassword(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm font-mono"
+                    />
+                  </div>
+                )}
+
+                {authError && (
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-red-600 text-[11px] font-mono leading-tight"
+                  >
+                    <AlertCircle size={14} />
+                    {authError}
+                  </motion.div>
+                )}
+
+                {authSuccess && (
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="p-3 bg-green-50 border border-green-100 rounded-lg flex items-center gap-2 text-green-600 text-[11px] font-mono leading-tight"
+                  >
+                    <CheckCircle2 size={14} />
+                    {authSuccess}
+                  </motion.div>
+                )}
+
+                <Button 
+                  type="submit" 
+                  className="w-full py-3 rounded-xl shadow-lg shadow-black/10 active:scale-[0.98] transition-all" 
+                  disabled={isAuthLoading}
+                >
+                  {isAuthLoading ? (
+                    <Loader2 className="animate-spin" size={18} />
+                  ) : (
+                    <span className="flex items-center gap-2 tracking-widest text-[11px] font-bold uppercase">
+                      {authMode === 'login' ? 'Execute Login' : 'Register Account'}
+                      <ChevronRight size={14} />
+                    </span>
+                  )}
+                </Button>
+              </form>
+
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-zinc-100"></div>
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase tracking-widest">
+                  <span className="bg-white px-3 text-zinc-300 font-bold">Bridge Connection</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                <Button 
+                  onClick={loginWithGoogle} 
+                  variant="secondary" 
+                  className="w-full py-2.5 rounded-xl border-zinc-200" 
+                  icon={TrendingUp}
+                  disabled={isAuthLoading}
+                >
+                  <span className="text-[11px] font-bold uppercase tracking-widest">Google Identity</span>
+                </Button>
+              </div>
+
+              <div className="text-center">
+                <button 
+                  onClick={() => {
+                    setAuthMode(authMode === 'login' ? 'signup' : 'login');
+                    setAuthError(null);
+                    setAuthSuccess(null);
+                  }}
+                  className="text-[10px] uppercase font-bold tracking-[0.1em] text-zinc-400 hover:text-black transition-colors"
+                >
+                  {authMode === 'login' ? (
+                    <>Access Denied? <span className="text-black border-b border-black/20 pb-0.5">Initialize Account</span></>
+                  ) : (
+                    <>Existing Unit? <span className="text-black border-b border-black/20 pb-0.5">Resume Session</span></>
+                  )}
+                </button>
+              </div>
             </div>
           </Card>
 
-          <p className="text-xs text-zinc-400 uppercase tracking-widest font-semibold">Moeda: Metical (MT)</p>
+          <div className="pt-4 space-y-2">
+            <p className="text-[10px] text-zinc-400 uppercase tracking-[0.3em] font-bold">Standard: Metical (MZN)</p>
+            <div className="flex items-center justify-center gap-4 opacity-20 filter grayscale">
+               <Shield size={12} />
+               <Lock size={12} />
+               <Key size={12} />
+            </div>
+          </div>
         </motion.div>
       </div>
     );
