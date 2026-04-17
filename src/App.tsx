@@ -42,7 +42,10 @@ import {
   loginWithGoogle, 
   logout, 
   OperationType, 
-  handleFirestoreError 
+  handleFirestoreError,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile
 } from './firebase';
 import { 
   collection, 
@@ -252,6 +255,16 @@ export default function App() {
   const [showFilters, setShowFilters] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Email/Password Auth State
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authSuccess, setAuthSuccess] = useState<string | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+
   // Employee State
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -288,6 +301,86 @@ export default function App() {
     });
     return () => unsubscribe();
   }, []);
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    setAuthSuccess(null);
+
+    if (!email || !password) {
+      setAuthError('Por favor, preencha todos os campos.');
+      return;
+    }
+
+    setIsAuthLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        setAuthError('E-mail ou senha incorretos.');
+      } else if (error.code === 'auth/invalid-email') {
+        setAuthError('E-mail inválido.');
+      } else {
+        setAuthError('Ocorreu um erro ao entrar. Tente novamente.');
+      }
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleEmailSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    setAuthSuccess(null);
+
+    if (!name || !email || !password || !confirmPassword) {
+      setAuthError('Por favor, preencha todos os campos.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setAuthError('As senhas não coincidem.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setAuthError('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    setIsAuthLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: name });
+      
+      setAuthSuccess('Conta criada com sucesso! Redirecionando...');
+      setTimeout(() => {
+        setAuthMode('login');
+        setAuthSuccess(null);
+        // Clear fields
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setName('');
+      }, 2000);
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        setAuthError('Este e-mail já está em uso.');
+      } else if (error.code === 'auth/invalid-email') {
+        setAuthError('E-mail inválido.');
+      } else if (error.code === 'auth/weak-password') {
+        setAuthError('A senha é muito fraca.');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        setAuthError('O cadastro por e-mail ainda não foi ativado no Firebase Console. Por favor, ative-o em Authentication > Sign-in method.');
+      } else {
+        setAuthError('Ocorreu um erro ao criar a conta. Tente novamente.');
+      }
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
 
   // Data Listeners
   useEffect(() => {
@@ -976,11 +1069,11 @@ export default function App() {
 
   if (!user) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-zinc-50 p-6">
+      <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-zinc-50 p-6 overflow-y-auto">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full text-center space-y-8"
+          className="max-w-md w-full text-center space-y-8 py-12"
         >
           <div className="space-y-2">
             <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-black/10">
@@ -989,9 +1082,111 @@ export default function App() {
             <h1 className="text-4xl font-bold tracking-tight">Inventário</h1>
             <p className="text-zinc-500">Gerencie seu estoque, compras e vendas com inteligência artificial.</p>
           </div>
-          <Button onClick={loginWithGoogle} className="w-full py-4 text-lg" icon={TrendingUp}>
-            Entrar com Google
-          </Button>
+
+          <Card className="p-6 text-left space-y-4">
+            <h2 className="text-xl font-bold">{authMode === 'login' ? 'Entrar' : 'Criar Conta'}</h2>
+            
+            <form onSubmit={authMode === 'login' ? handleEmailLogin : handleEmailSignup} className="space-y-4">
+              {authMode === 'signup' && (
+                <Input
+                  label="Nome Completo"
+                  placeholder="Seu nome"
+                  value={name}
+                  onChange={(e: any) => setName(e.target.value)}
+                  required
+                />
+              )}
+              <Input
+                label="E-mail"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e: any) => setEmail(e.target.value)}
+                required
+              />
+              <Input
+                label="Senha"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e: any) => setPassword(e.target.value)}
+                required
+              />
+              {authMode === 'signup' && (
+                <Input
+                  label="Confirmar Senha"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e: any) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              )}
+
+              {authError && (
+                <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-red-600 text-sm">
+                  <AlertCircle size={16} />
+                  {authError}
+                </div>
+              )}
+
+              {authSuccess && (
+                <div className="p-3 bg-green-50 border border-green-100 rounded-lg flex items-center gap-2 text-green-600 text-sm">
+                  <CheckCircle2 size={16} />
+                  {authSuccess}
+                </div>
+              )}
+
+              <Button 
+                type="submit" 
+                className="w-full py-2.5" 
+                disabled={isAuthLoading}
+              >
+                {isAuthLoading ? (
+                  <Loader2 className="animate-spin" size={18} />
+                ) : (
+                  authMode === 'login' ? 'Entrar' : 'Criar Conta'
+                )}
+              </Button>
+            </form>
+
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-zinc-100"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-zinc-400 font-medium">Ou continue com</span>
+              </div>
+            </div>
+
+            <Button 
+              onClick={loginWithGoogle} 
+              variant="secondary" 
+              className="w-full py-2.5" 
+              icon={TrendingUp}
+              disabled={isAuthLoading}
+            >
+              Google
+            </Button>
+
+            <div className="text-center pt-2">
+              <button 
+                onClick={() => {
+                  setAuthMode(authMode === 'login' ? 'signup' : 'login');
+                  setAuthError(null);
+                  setAuthSuccess(null);
+                }}
+                className="text-sm text-zinc-500 hover:text-black transition-colors"
+              >
+                {authMode === 'login' ? (
+                  <>Não tem uma conta? <span className="font-bold">Criar conta</span></>
+                ) : (
+                  <>Já tem uma conta? <span className="font-bold">Entrar</span></>
+                )}
+              </button>
+            </div>
+          </Card>
+
           <p className="text-xs text-zinc-400 uppercase tracking-widest font-semibold">Moeda: Metical (MT)</p>
         </motion.div>
       </div>
