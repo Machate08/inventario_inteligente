@@ -356,7 +356,10 @@ export default function App() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: name });
       
-      setAuthSuccess('Conta criada com sucesso! Redirecionando...');
+      // Sign out immediately to redirect to login screen as requested
+      await logout();
+      
+      setAuthSuccess('Conta criada com sucesso! Redirecionando para o login...');
       setTimeout(() => {
         setAuthMode('login');
         setAuthSuccess(null);
@@ -365,7 +368,8 @@ export default function App() {
         setPassword('');
         setConfirmPassword('');
         setName('');
-      }, 2000);
+        setIsAuthLoading(false);
+      }, 2500);
     } catch (error: any) {
       console.error('Signup error:', error);
       if (error.code === 'auth/email-already-in-use') {
@@ -1196,7 +1200,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-zinc-50 text-zinc-900 font-sans overflow-hidden">
+    <div className="h-screen h-[100dvh] flex flex-col bg-zinc-50 text-zinc-900 font-sans overflow-hidden">
       {/* Menu Hamburguer Overlay */}
       <AnimatePresence>
         {isMenuOpen && (
